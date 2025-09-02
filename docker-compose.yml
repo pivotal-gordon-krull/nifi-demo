@@ -1,0 +1,41 @@
+services:
+  source-db:
+    image: postgres
+    restart: always
+    environment:
+      - POSTGRES_DB=sourcedb
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=a_password
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./init-source:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: [ "CMD", "pg_isready" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  destination-db:
+    image: postgres
+    restart: always
+    environment:
+      - POSTGRES_DB=destdb
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=another_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./init-dest:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: [ "CMD", "pg_isready" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  nifi:
+    image: apache/nifi
+    ports:
+      - "8443:8443"
+    volumes:
+      - ./driver:/driver
